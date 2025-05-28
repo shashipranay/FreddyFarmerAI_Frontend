@@ -45,20 +45,9 @@ const Header = () => {
                 <Link to="/marketplace" className="text-gray-600 hover:text-organic-green">
                   {t('marketplace')}
                 </Link>
-                {isFarmer ? (
-                  <Link to="/for-farmers" className="text-gray-600 hover:text-organic-green">
-                    {t('forFarmers')}
-                  </Link>
-                ) : (
-                  <>
-                    <Link to="/how-it-works" className="text-gray-600 hover:text-organic-green">
-                      {t('howItWorks')}
-                    </Link>
-                    <Link to="/about" className="text-gray-600 hover:text-organic-green">
-                      {t('about')}
-                    </Link>
-                  </>
-                )}
+                <Link to="/about" className="text-gray-600 hover:text-organic-green">
+                  {t('about')}
+                </Link>
               </>
             ) : (
               <>
