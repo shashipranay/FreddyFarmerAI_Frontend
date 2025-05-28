@@ -37,7 +37,11 @@ const Login = () => {
         title: 'Success',
         description: 'Logged in successfully',
       });
-      navigate('/marketplace');
+      if (response.user.role === 'farmer') {
+        navigate('/farmer/dashboard');
+      } else {
+        navigate('/marketplace');
+      }
     } catch (error) {
       toast({
         title: 'Error',

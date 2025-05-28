@@ -1,3 +1,4 @@
+import FarmerProducts from '@/components/FarmerProducts';
 import Footer from '@/components/Footer';
 import Header from '@/components/Header';
 import { Button } from '@/components/ui/button';
@@ -43,49 +44,13 @@ const FarmerDashboard = () => {
             </Button>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="space-y-8">
             <Card>
               <CardHeader>
-                <CardTitle>My Products</CardTitle>
+                <CardTitle>Product Management</CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-gray-600">Manage your products and inventory</p>
-                <Button
-                  className="mt-4 w-full bg-organic-green hover:bg-organic-green-dark"
-                  onClick={() => navigate('/farmer/products')}
-                >
-                  View Products
-                </Button>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle>Orders</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-gray-600">View and manage customer orders</p>
-                <Button
-                  className="mt-4 w-full bg-organic-green hover:bg-organic-green-dark"
-                  onClick={() => navigate('/farmer/orders')}
-                >
-                  View Orders
-                </Button>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle>Analytics</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-gray-600">View your sales and performance metrics</p>
-                <Button
-                  className="mt-4 w-full bg-organic-green hover:bg-organic-green-dark"
-                  onClick={() => navigate('/farmer/analytics')}
-                >
-                  View Analytics
-                </Button>
+                <FarmerProducts />
               </CardContent>
             </Card>
           </div>

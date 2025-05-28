@@ -1,12 +1,68 @@
-
-import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, LineChart, Line, PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
+import { useToast } from '@/components/ui/use-toast';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { farmer } from '@/services/api';
+import { useEffect, useState } from 'react';
+import { Bar, BarChart, CartesianGrid, Cell, Line, LineChart, Pie, PieChart, ResponsiveContainer, XAxis, YAxis } from 'recharts';
+
+interface AnalyticsData {
+  insights: string;
+  summary: {
+    totalProducts: number;
+    totalSales: number;
+    totalExpenses: number;
+    lowStockProducts: number;
+    organicProducts: number;
+  };
+  trends: {
+    salesByCategory: Record<string, number>;
+    expensesByCategory: Record<string, number>;
+    stockLevels: Array<{
+      name: string;
+      stock: number;
+      category: string;
+    }>;
+  };
+  period: string;
+  metrics: string[];
+}
 
 const AIAnalyticsDashboard = () => {
   const { t } = useLanguage();
+  const { toast } = useToast();
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [analytics, setAnalytics] = useState<AnalyticsData | null>(null);
+
+  useEffect(() => {
+    fetchAnalytics();
+  }, []);
+
+  const fetchAnalytics = async () => {
+    try {
+      setIsLoading(true);
+      setError(null);
+      
+      const data = await farmer.getAIAnalytics({
+        period: 'monthly',
+        metrics: ['revenue', 'expenses', 'crop_health', 'yield_prediction'],
+      });
+      
+      setAnalytics(data);
+    } catch (error) {
+      console.error('Failed to fetch analytics:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Failed to fetch analytics';
+      setError(errorMessage);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: errorMessage,
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const revenueData = [
     { month: 'Jan', revenue: 15000, expenses: 8000 },
@@ -51,6 +107,35 @@ const AIAnalyticsDashboard = () => {
       color: '#34D399',
     },
   };
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-organic-green mx-auto"></div>
+          <p className="mt-4 text-gray-600">Loading AI analytics...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="text-center">
+          <div className="text-red-500 text-4xl mb-4">⚠️</div>
+          <p className="text-gray-800 font-medium mb-2">Failed to load analytics</p>
+          <p className="text-gray-600 mb-4">{error}</p>
+          <button
+            onClick={fetchAnalytics}
+            className="px-4 py-2 bg-organic-green text-white rounded hover:bg-organic-green-dark transition-colors"
+          >
+            Try Again
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <section className="py-16 bg-gray-50">

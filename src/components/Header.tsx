@@ -11,7 +11,7 @@ import {
 import { useToast } from "@/components/ui/use-toast";
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { LogOut, User } from "lucide-react";
+import { LogOut, Plus, User } from "lucide-react";
 import { Link, useNavigate } from 'react-router-dom';
 
 const Header = () => {
@@ -45,6 +45,19 @@ const Header = () => {
                 <Link to="/marketplace" className="text-gray-600 hover:text-organic-green">
                   {t('marketplace')}
                 </Link>
+                {isFarmer && (
+                  <>
+                    <Link to="/farmer/ai-analytics" className="text-gray-600 hover:text-organic-green">
+                      AI Analytics
+                    </Link>
+                    <Link to="/farmer/expenses" className="text-gray-600 hover:text-organic-green">
+                      Expenses
+                    </Link>
+                    <Link to="/farmer/trades" className="text-gray-600 hover:text-organic-green">
+                      Trades
+                    </Link>
+                  </>
+                )}
                 <Link to="/about" className="text-gray-600 hover:text-organic-green">
                   {t('about')}
                 </Link>
@@ -91,6 +104,12 @@ const Header = () => {
                     <User className="h-4 w-4 mr-2" />
                     Dashboard
                   </DropdownMenuItem>
+                  {isFarmer && (
+                    <DropdownMenuItem onClick={() => navigate('/farmer/add-product')}>
+                      <Plus className="h-4 w-4 mr-2" />
+                      Add Product
+                    </DropdownMenuItem>
+                  )}
                   <DropdownMenuItem onClick={handleLogout}>
                     <LogOut className="h-4 w-4 mr-2" />
                     Sign Out
