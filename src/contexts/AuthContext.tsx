@@ -1,3 +1,4 @@
+import { auth } from '@/services/api';
 import React, { createContext, useContext, useEffect, useState } from 'react';
 
 interface User {
@@ -11,6 +12,7 @@ interface AuthContextType {
   user: User | null;
   isAuthenticated: boolean;
   isFarmer: boolean;
+  loading: boolean;
   login: (token: string, user: User) => void;
   logout: () => void;
 }
@@ -20,16 +22,32 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Check for token and user data in localStorage on mount
-    const token = localStorage.getItem('token');
-    const userData = localStorage.getItem('user');
-    
-    if (token && userData) {
-      setUser(JSON.parse(userData));
-      setIsAuthenticated(true);
-    }
+    const checkAuth = async () => {
+      try {
+        const token = localStorage.getItem('token');
+        const userData = localStorage.getItem('user');
+        
+        if (token && userData) {
+          // Verify token with backend
+          await auth.verifyToken();
+          setUser(JSON.parse(userData));
+          setIsAuthenticated(true);
+        }
+      } catch (error) {
+        // Clear invalid auth data
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        setUser(null);
+        setIsAuthenticated(false);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    checkAuth();
   }, []);
 
   const login = (token: string, userData: User) => {
@@ -52,6 +70,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         user,
         isAuthenticated,
         isFarmer: user?.role === 'farmer',
+        loading,
         login,
         logout,
       }}

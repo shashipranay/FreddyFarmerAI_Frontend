@@ -10,11 +10,12 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { auth } from '@/services/api';
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 const Login = () => {
   const { t } = useLanguage();
   const navigate = useNavigate();
+  const location = useLocation();
   const { toast } = useToast();
   const { login } = useAuth();
   const [activeTab, setActiveTab] = useState('login');
@@ -33,15 +34,18 @@ const Login = () => {
     try {
       const response = await auth.login(formData.email, formData.password);
       login(response.token, response.user);
+      
+      // Redirect based on user role
+      if (response.user.role === 'farmer') {
+        navigate('/farmer/dashboard');
+      } else if (response.user.role === 'buyer') {
+        navigate('/customer/dashboard');
+      }
+
       toast({
         title: 'Success',
         description: 'Logged in successfully',
       });
-      if (response.user.role === 'farmer') {
-        navigate('/farmer/dashboard');
-      } else {
-        navigate('/marketplace');
-      }
     } catch (error) {
       toast({
         title: 'Error',

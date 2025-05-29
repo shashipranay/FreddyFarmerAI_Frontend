@@ -95,6 +95,16 @@ api.interceptors.response.use(
   }
 );
 
+const handleApiError = (error: any) => {
+  if (error.response) {
+    throw new Error(error.response.data.message || 'An error occurred');
+  } else if (error.request) {
+    throw new Error('No response from server');
+  } else {
+    throw new Error('Error setting up request');
+  }
+};
+
 export const auth = {
   register: async (userData: {
     name: string;
@@ -151,11 +161,6 @@ export const auth = {
       }
       throw new Error('Failed to upload image');
     }
-  },
-
-  getProducts: async () => {
-    const response = await api.get('/products');
-    return response.data;
   },
 
   verifyToken: () => {
@@ -317,7 +322,36 @@ export const farmer = {
   getProduct: async (productId: string) => {
     const response = await api.get(`/products/${productId}`);
     return response.data;
-  }
+  },
+
+  uploadImage: async (file: File) => {
+    try {
+      const formData = new FormData();
+      formData.append('image', file);
+      
+      const response = await api.post('/upload', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+        timeout: 30000, // 30 second timeout for uploads
+      });
+      
+      if (!response.data?.imageUrl) {
+        throw new Error('No image URL received from server');
+      }
+      
+      return response.data.imageUrl;
+    } catch (error) {
+      if (error instanceof Error) {
+        console.error('Image upload error:', error.message);
+        if (error.message.includes('Network Error')) {
+          throw new Error('Unable to connect to the server. Please check if the server is running.');
+        }
+        throw new Error(`Failed to upload image: ${error.message}`);
+      }
+      throw new Error('Failed to upload image');
+    }
+  },
 };
 
 export const customer = {
@@ -369,6 +403,87 @@ export const customer = {
     const response = await api.post('/customer/orders', orderData);
     return response.data;
   },
+
+  async getOrders() {
+    try {
+      const response = await api.get('/customer/orders');
+      return response.data;
+    } catch (error) {
+      handleApiError(error);
+    }
+  },
+
+  async getProducts() {
+    try {
+      const response = await api.get('/products');
+      return response.data;
+    } catch (error) {
+      handleApiError(error);
+    }
+  },
+
+  async getMarketInsights() {
+    try {
+      const response = await api.get('/customer/market-insights');
+      return response.data;
+    } catch (error) {
+      handleApiError(error);
+    }
+  },
+
+  async addToCart(productId: string) {
+    try {
+      const response = await api.post('/customer/cart', { productId });
+      return response.data;
+    } catch (error) {
+      handleApiError(error);
+    }
+  },
+
+  async getCart() {
+    try {
+      const response = await api.get('/customer/cart');
+      return response.data;
+    } catch (error) {
+      handleApiError(error);
+    }
+  },
+
+  async updateCartItem(productId: string, quantity: number) {
+    try {
+      const response = await api.put('/customer/cart', { productId, quantity });
+      return response.data;
+    } catch (error) {
+      handleApiError(error);
+    }
+  },
+
+  async removeFromCart(productId: string) {
+    try {
+      const response = await api.delete(`/customer/cart/${productId}`);
+      return response.data;
+    } catch (error) {
+      handleApiError(error);
+    }
+  },
+
+  async checkout() {
+    try {
+      const response = await api.post('/customer/checkout');
+      return response.data;
+    } catch (error) {
+      handleApiError(error);
+    }
+  },
+
+  async getChatResponse(message: string) {
+    try {
+      const response = await api.post('/customer/chat', { message });
+      return response.data;
+    } catch (error) {
+      handleApiError(error);
+    }
+  }
 };
 
 export default api; 

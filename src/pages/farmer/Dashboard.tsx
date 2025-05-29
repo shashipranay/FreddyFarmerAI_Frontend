@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/components/ui/use-toast';
 import { auth } from '@/services/api';
+import { BarChart, DollarSign, Package, TrendingUp } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 const FarmerDashboard = () => {
@@ -28,6 +29,33 @@ const FarmerDashboard = () => {
     }
   };
 
+  const dashboardItems = [
+    {
+      title: 'AI Analytics',
+      description: 'View AI-powered insights and predictions',
+      icon: <BarChart className="h-6 w-6" />,
+      onClick: () => navigate('/farmer/ai-analytics'),
+    },
+    {
+      title: 'Expenses',
+      description: 'Track and manage your farm expenses',
+      icon: <DollarSign className="h-6 w-6" />,
+      onClick: () => navigate('/farmer/expenses'),
+    },
+    {
+      title: 'Trades',
+      description: 'Manage your trades and transactions',
+      icon: <TrendingUp className="h-6 w-6" />,
+      onClick: () => navigate('/farmer/trades'),
+    },
+    {
+      title: 'Products',
+      description: 'Manage your products and inventory',
+      icon: <Package className="h-6 w-6" />,
+      onClick: () => navigate('/farmer/add-product'),
+    },
+  ];
+
   return (
     <div className="min-h-screen bg-gray-50">
       <Header />
@@ -44,16 +72,32 @@ const FarmerDashboard = () => {
             </Button>
           </div>
 
-          <div className="space-y-8">
-            <Card>
-              <CardHeader>
-                <CardTitle>Product Management</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <FarmerProducts />
-              </CardContent>
-            </Card>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            {dashboardItems.map((item, index) => (
+              <Card
+                key={index}
+                className="hover:shadow-lg transition-all duration-300 cursor-pointer"
+                onClick={item.onClick}
+              >
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-xl font-bold">{item.title}</CardTitle>
+                  {item.icon}
+                </CardHeader>
+                <CardContent>
+                  <p className="text-sm text-gray-500">{item.description}</p>
+                </CardContent>
+              </Card>
+            ))}
           </div>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Product Management</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <FarmerProducts />
+            </CardContent>
+          </Card>
         </div>
       </div>
       <Footer />
