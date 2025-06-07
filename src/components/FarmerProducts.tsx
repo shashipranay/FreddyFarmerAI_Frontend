@@ -81,7 +81,7 @@ const FarmerProducts = () => {
       setLoading(true);
       const response = await farmer.getProducts();
       setProducts(response.products || []);
-    } catch (error) {
+      } catch (error) {
       toast({
         title: 'Error',
         description: 'Failed to fetch products',
@@ -225,9 +225,9 @@ const FarmerProducts = () => {
             </DialogHeader>
             <form onSubmit={handleCreateProduct} className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="name">Product Name</Label>
-                <Input
-                  id="name"
+              <Label htmlFor="name">Product Name</Label>
+              <Input
+                id="name"
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                   required
@@ -452,27 +452,27 @@ const FarmerProducts = () => {
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="edit-price">Price</Label>
-                <Input
+              <Input
                   id="edit-price"
-                  type="number"
-                  min="0"
-                  step="0.01"
-                  value={formData.price}
+                type="number"
+                min="0"
+                step="0.01"
+                value={formData.price}
                   onChange={(e) => setFormData({ ...formData, price: e.target.value })}
-                  required
-                />
-              </div>
+                required
+              />
+            </div>
 
               <div className="space-y-2">
                 <Label htmlFor="edit-stock">Stock</Label>
-                <Input
+              <Input
                   id="edit-stock"
-                  type="number"
-                  min="0"
-                  value={formData.stock}
+                type="number"
+                min="0"
+                value={formData.stock}
                   onChange={(e) => setFormData({ ...formData, stock: e.target.value })}
-                  required
-                />
+                required
+              />
               </div>
             </div>
 
@@ -518,7 +518,7 @@ const FarmerProducts = () => {
 
             <div className="space-y-2">
               <Label htmlFor="edit-image">Product Image</Label>
-              <div className="flex items-center space-x-2">
+            <div className="flex items-center space-x-2">
                 <Input
                   id="edit-image"
                   type="file"
@@ -547,7 +547,7 @@ const FarmerProducts = () => {
                 className="rounded border-gray-300"
               />
               <Label htmlFor="edit-organic">Organic Product</Label>
-            </div>
+      </div>
 
             <Button type="submit" className="w-full">
               Update Product
