@@ -212,7 +212,7 @@ const CustomerDashboard = () => {
                     <div className="flex justify-between items-center">
                       <span className="font-semibold">${product.price.toFixed(2)}</span>
                       <Button
-                        onClick={() => handleAddToCart(product.id)}
+                        onClick={() => handleAddToCart(product._id)}
                         size="sm"
                         className="bg-organic-green hover:bg-organic-green-dark"
                       >

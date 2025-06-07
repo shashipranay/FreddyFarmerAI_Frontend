@@ -4,8 +4,10 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/components/ui/use-toast';
 import { customer } from '@/services/api';
+import { AxiosError } from 'axios';
 import { Trash2 } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 interface CartItem {
   id: string;
@@ -26,9 +28,10 @@ interface CartResponse {
 
 const Cart = () => {
   const { toast } = useToast();
+  const navigate = useNavigate();
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [total, setTotal] = useState(0);
-  const [loading, setLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     fetchCartItems();
@@ -36,7 +39,7 @@ const Cart = () => {
 
   const fetchCartItems = async () => {
     try {
-      setLoading(true);
+      setIsLoading(true);
       const response = await customer.getCart();
       const cartData = response as CartResponse;
       setCartItems(cartData.cart.products || []);
@@ -48,7 +51,7 @@ const Cart = () => {
         variant: 'destructive',
       });
     } finally {
-      setLoading(false);
+      setIsLoading(false);
     }
   };
 
@@ -100,22 +103,29 @@ const Cart = () => {
 
   const handleCheckout = async () => {
     try {
-      setLoading(true);
-      await customer.checkout();
+      setIsLoading(true);
+      const response = await customer.checkout();
       toast({
         title: 'Success',
-        description: 'Order placed successfully',
+        description: 'Order placed successfully! You will be notified when your products are delivered.',
       });
-      setCartItems([]);
-      setTotal(0);
+      navigate('/customer/dashboard');
     } catch (error) {
-      toast({
-        title: 'Error',
-        description: 'Failed to place order',
-        variant: 'destructive',
-      });
+      if (error instanceof AxiosError) {
+        toast({
+          title: 'Error',
+          description: error.response?.data?.message || 'Failed to process checkout',
+          variant: 'destructive',
+        });
+      } else {
+        toast({
+          title: 'Error',
+          description: 'Failed to process checkout',
+          variant: 'destructive',
+        });
+      }
     } finally {
-      setLoading(false);
+      setIsLoading(false);
     }
   };
 
@@ -126,7 +136,7 @@ const Cart = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-8">Shopping Cart</h1>
 
-          {loading ? (
+          {isLoading ? (
             <div className="flex justify-center py-8">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-organic-green"></div>
             </div>
@@ -135,7 +145,7 @@ const Cart = () => {
               <CardContent className="flex flex-col items-center justify-center py-12">
                 <p className="text-gray-500 mb-4">Your cart is empty</p>
                 <Button
-                  onClick={() => window.location.href = '/marketplace'}
+                  onClick={() => navigate('/marketplace')}
                   className="bg-organic-green hover:bg-organic-green-dark"
                 >
                   Continue Shopping
@@ -218,9 +228,9 @@ const Cart = () => {
                       <Button
                         className="w-full bg-organic-green hover:bg-organic-green-dark"
                         onClick={handleCheckout}
-                        disabled={loading}
+                        disabled={isLoading}
                       >
-                        {loading ? 'Processing...' : 'Proceed to Checkout'}
+                        {isLoading ? 'Processing...' : 'Proceed to Checkout'}
                       </Button>
                     </div>
                   </CardContent>

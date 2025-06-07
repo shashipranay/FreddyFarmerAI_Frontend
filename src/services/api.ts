@@ -214,8 +214,12 @@ export const farmer = {
     return api.get('/farmer/trades');
   },
 
-  updateTradeStatus: (tradeId: string, status: string) => {
-    return api.put(`/farmer/trades/${tradeId}/status`, { status });
+  updateTradeStatus: async (tradeId: string, status: string) => {
+    console.log('Updating trade status:', { tradeId, status });
+    const response = await api.put(`/farmer/trades/${encodeURIComponent(tradeId)}/status`, { 
+      status: status.toLowerCase() 
+    });
+    return response;
   },
 
   createTestTrades: (data: { count: number }) => {
@@ -396,7 +400,7 @@ export const customer = {
 
   updateCartItem: async (productId: string, quantity: number) => {
     try {
-      const response = await api.put('/customer/cart/update', { productId, quantity });
+      const response = await api.put(`/customer/cart/update/${productId}`, { quantity });
       return response.data;
     } catch (error) {
       handleApiError(error);
@@ -430,7 +434,7 @@ export const customer = {
     return response.data;
   },
 
-  async getOrders() {
+  getOrders: async () => {
     try {
       const response = await api.get('/customer/orders');
       return response.data;
@@ -439,16 +443,7 @@ export const customer = {
     }
   },
 
-  async getProducts() {
-    try {
-      const response = await api.get('/products');
-      return response.data;
-    } catch (error) {
-      handleApiError(error);
-    }
-  },
-
-  async getMarketInsights() {
+  getMarketInsights: async () => {
     try {
       const response = await api.get('/customer/market-insights');
       return response.data;
@@ -457,16 +452,16 @@ export const customer = {
     }
   },
 
-  async checkout() {
+  checkout: async () => {
     try {
-      const response = await api.post('/customer/checkout');
+      const response = await api.post('/customer/cart/checkout');
       return response.data;
     } catch (error) {
       handleApiError(error);
     }
   },
 
-  async getChatResponse(message: string) {
+  getChatResponse: async (message: string) => {
     try {
       const response = await api.post('/customer/chat', { message });
       return response.data;

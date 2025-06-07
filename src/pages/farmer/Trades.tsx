@@ -135,37 +135,40 @@ const Trades = () => {
     try {
       const response = await farmer.updateTradeStatus(tradeId, newStatus);
       
-      // Update local state
-      setTrades(trades.map(trade => 
-        trade._id === tradeId ? { ...trade, status: newStatus } : trade
-      ));
+      if (response.data) {
+        // Update local state
+        setTrades(trades.map(trade => 
+          trade._id === tradeId ? { ...trade, status: newStatus } : trade
+        ));
 
-      // Show appropriate message based on status
-      let message = '';
-      switch (newStatus) {
-        case 'completed':
-          message = 'Trade completed successfully';
-          break;
-        case 'cancelled':
-          message = 'Trade cancelled';
-          break;
-        case 'pending':
-          message = 'Trade status updated to pending';
-          break;
+        // Show appropriate message based on status
+        let message = '';
+        switch (newStatus) {
+          case 'completed':
+            message = 'Trade completed successfully';
+            break;
+          case 'cancelled':
+            message = 'Trade cancelled';
+            break;
+          case 'pending':
+            message = 'Trade status updated to pending';
+            break;
+        }
+
+        toast({
+          title: 'Success',
+          description: message,
+        });
+
+        // Refresh analytics
+        fetchTrades();
       }
-
-      toast({
-        title: 'Success',
-        description: message,
-      });
-
-      // Refresh analytics
-      fetchTrades();
     } catch (error: any) {
       console.error('Error updating trade status:', error);
+      const errorMessage = error.response?.data?.error || 'Failed to update trade status';
       toast({
         title: 'Error',
-        description: error.response?.data?.error || 'Failed to update trade status',
+        description: errorMessage,
         variant: 'destructive',
       });
     }
