@@ -73,6 +73,7 @@ const App = () => (
                   <AddProduct />
                 </ProtectedRoute>
               } />
+              <Route path="/marketplace" element={<Marketplace />} />
 
               {/* Customer Routes */}
               <Route path="/customer/dashboard" element={
@@ -93,11 +94,6 @@ const App = () => (
               <Route path="/ai-insights" element={
                 <ProtectedRoute requiredRole="buyer">
                   <AIInsights />
-                </ProtectedRoute>
-              } />
-              <Route path="/marketplace" element={
-                <ProtectedRoute requiredRole="buyer">
-                  <Marketplace />
                 </ProtectedRoute>
               } />
             </Routes>

@@ -130,10 +130,11 @@ const Marketplace = () => {
         title: 'Success',
         description: 'Product added to cart',
       });
-    } catch (error) {
+    } catch (error: any) {
+      console.error('Error adding to cart:', error);
       toast({
         title: 'Error',
-        description: 'Failed to add product to cart',
+        description: error.message || 'Failed to add product to cart',
         variant: 'destructive',
       });
     }

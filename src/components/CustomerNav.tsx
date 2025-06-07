@@ -1,16 +1,16 @@
 import { Button } from '@/components/ui/button';
 import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuLabel,
-    DropdownMenuSeparator,
-    DropdownMenuTrigger,
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { useToast } from '@/components/ui/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
 import { auth } from '@/services/api';
-import { BarChart, LogOut, MessageSquare, ShoppingCart, Store, User } from 'lucide-react';
+import { BarChart, Home, LogOut, MessageSquare, ShoppingCart, Store, User } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 const CustomerNav = () => {
@@ -38,6 +38,14 @@ const CustomerNav = () => {
 
   return (
     <div className="flex items-center space-x-4">
+      <Button
+        variant="ghost"
+        onClick={() => navigate('/customer/dashboard')}
+        className="text-gray-700 hover:text-organic-green"
+      >
+        <Home className="h-5 w-5 mr-2" />
+        Dashboard
+      </Button>
       <Button
         variant="ghost"
         onClick={() => navigate('/marketplace')}

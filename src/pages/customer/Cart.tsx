@@ -13,12 +13,21 @@ interface CartItem {
   price: number;
   quantity: number;
   image: string;
-  farmer: string;
+  stock: number;
+}
+
+interface CartResponse {
+  cart: {
+    id: string;
+    products: CartItem[];
+    total: number;
+  };
 }
 
 const Cart = () => {
   const { toast } = useToast();
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
+  const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -29,7 +38,9 @@ const Cart = () => {
     try {
       setLoading(true);
       const response = await customer.getCart();
-      setCartItems(response.items || []);
+      const cartData = response as CartResponse;
+      setCartItems(cartData.cart.products || []);
+      setTotal(cartData.cart.total || 0);
     } catch (error) {
       toast({
         title: 'Error',
@@ -41,31 +52,62 @@ const Cart = () => {
     }
   };
 
-  const handleRemoveItem = (itemId: string) => {
-    setCartItems(cartItems.filter(item => item.id !== itemId));
-    toast({
-      title: 'Success',
-      description: 'Item removed from cart',
-    });
+  const handleRemoveItem = async (productId: string) => {
+    try {
+      await customer.removeFromCart(productId);
+      await fetchCartItems(); // Refresh cart after removal
+      toast({
+        title: 'Success',
+        description: 'Item removed from cart',
+      });
+    } catch (error) {
+      toast({
+        title: 'Error',
+        description: 'Failed to remove item from cart',
+        variant: 'destructive',
+      });
+    }
   };
 
-  const handleUpdateQuantity = (itemId: string, newQuantity: number) => {
+  const handleUpdateQuantity = async (productId: string, newQuantity: number) => {
     if (newQuantity < 1) return;
-    setCartItems(cartItems.map(item =>
-      item.id === itemId ? { ...item, quantity: newQuantity } : item
-    ));
+    
+    // Find the item in cart
+    const item = cartItems.find(item => item.id === productId);
+    if (!item) return;
+
+    // Check if increasing quantity and if stock is available
+    if (newQuantity > item.quantity && newQuantity > item.stock) {
+      toast({
+        title: 'Error',
+        description: `Only ${item.stock} items available in stock`,
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    try {
+      await customer.updateCartItem(productId, newQuantity);
+      await fetchCartItems(); // Refresh cart after update
+    } catch (error) {
+      toast({
+        title: 'Error',
+        description: 'Failed to update quantity',
+        variant: 'destructive',
+      });
+    }
   };
 
   const handleCheckout = async () => {
     try {
       setLoading(true);
-      // TODO: Implement checkout logic
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await customer.checkout();
       toast({
         title: 'Success',
         description: 'Order placed successfully',
       });
       setCartItems([]);
+      setTotal(0);
     } catch (error) {
       toast({
         title: 'Error',
@@ -76,8 +118,6 @@ const Cart = () => {
       setLoading(false);
     }
   };
-
-  const total = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -116,7 +156,6 @@ const Cart = () => {
                         />
                         <div className="flex-1">
                           <h3 className="font-semibold text-lg">{item.name}</h3>
-                          <p className="text-gray-500">From: {item.farmer}</p>
                           <div className="flex items-center space-x-4 mt-2">
                             <div className="flex items-center space-x-2">
                               <Button

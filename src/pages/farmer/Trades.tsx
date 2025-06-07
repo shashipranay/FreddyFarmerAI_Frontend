@@ -32,14 +32,14 @@ interface Trade {
     _id: string;
     name: string;
     price: number;
-  };
+  } | null;
   quantity: number;
   amount: number;
   status: 'completed' | 'pending' | 'cancelled';
   buyer?: {
     _id: string;
     name: string;
-  };
+  } | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -174,10 +174,33 @@ const Trades = () => {
   const handleCreateTrade = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
+      const selectedProduct = products.find(p => p._id === createFormData.product);
+      if (!selectedProduct) {
+        toast({
+          title: 'Error',
+          description: 'Please select a valid product',
+          variant: 'destructive',
+        });
+        return;
+      }
+
+      const quantity = Number(createFormData.quantity);
+      if (isNaN(quantity) || quantity <= 0) {
+        toast({
+          title: 'Error',
+          description: 'Please enter a valid quantity',
+          variant: 'destructive',
+        });
+        return;
+      }
+
+      // Calculate amount based on product price and quantity
+      const amount = selectedProduct.price * quantity;
+
       await farmer.createTrade({
         product: createFormData.product,
-        quantity: Number(createFormData.quantity),
-        amount: Number(createFormData.amount),
+        quantity: quantity,
+        amount: amount,
       });
 
       toast({
@@ -193,10 +216,11 @@ const Trades = () => {
       });
 
       fetchTrades(); // Refresh the trades list
-    } catch (error) {
+    } catch (error: any) {
+      console.error('Error creating trade:', error);
       toast({
         title: 'Error',
-        description: 'Failed to create trade',
+        description: error.response?.data?.error || 'Failed to create trade',
         variant: 'destructive',
       });
     }
@@ -210,10 +234,12 @@ const Trades = () => {
   const handleProductSelect = (value: string) => {
     const product = products.find(p => p._id === value);
     if (product) {
+      const quantity = Number(createFormData.quantity) || 1;
+      const amount = product.price * quantity;
       setCreateFormData(prev => ({
         ...prev,
         product: value,
-        amount: (product.price * Number(prev.quantity || 1)).toString(),
+        amount: amount.toString(),
       }));
     }
   };
@@ -221,18 +247,22 @@ const Trades = () => {
   const handleQuantityChange = (value: string) => {
     const product = products.find(p => p._id === createFormData.product);
     if (product) {
+      const quantity = Number(value) || 0;
+      const amount = product.price * quantity;
       setCreateFormData(prev => ({
         ...prev,
         quantity: value,
-        amount: (product.price * Number(value)).toString(),
+        amount: amount.toString(),
       }));
     }
   };
 
   const filteredTrades = trades.filter(trade => {
     const matchesFilter = filter === 'all' || trade.status === filter;
-    const matchesSearch = trade.product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         trade.buyer?.name.toLowerCase().includes(searchQuery.toLowerCase());
+    const productName = trade.product?.name?.toLowerCase() || '';
+    const buyerName = trade.buyer?.name?.toLowerCase() || '';
+    const matchesSearch = productName.includes(searchQuery.toLowerCase()) ||
+                         buyerName.includes(searchQuery.toLowerCase());
     return matchesFilter && matchesSearch;
   });
 
@@ -401,7 +431,9 @@ const Trades = () => {
                   <TableBody>
                     {filteredTrades.map((trade) => (
                       <TableRow key={trade._id}>
-                        <TableCell className="font-medium">{trade.product.name}</TableCell>
+                        <TableCell className="font-medium">
+                          {trade.product?.name || 'Product not found'}
+                        </TableCell>
                         <TableCell>{trade.buyer?.name || 'N/A'}</TableCell>
                         <TableCell>{trade.quantity}</TableCell>
                         <TableCell>${trade.amount.toFixed(2)}</TableCell>

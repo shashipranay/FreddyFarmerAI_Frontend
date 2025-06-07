@@ -1,6 +1,5 @@
 import Footer from '@/components/Footer';
 import Header from '@/components/Header';
-import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
     Select,
@@ -12,8 +11,9 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/components/ui/use-toast';
 import { farmer } from '@/services/api';
-import { AlertTriangle, BarChart, DollarSign, LineChart, Package, PieChart, TrendingUp } from 'lucide-react';
+import { AlertTriangle, DollarSign, Package } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 
 interface SalesDataPoint {
   date: string;
@@ -26,88 +26,85 @@ interface ProductData {
   revenue: number;
 }
 
-interface InventoryData {
-  category: string;
-  quantity: number;
-  percentage: number;
-}
-
 interface StockLevel {
-  product: string;
-  current: number;
-  minimum: number;
-  maximum: number;
+  name: string;
+  stock: number;
+  category: string;
 }
 
-interface AnalyticsData {
+interface AnalyticsSummary {
+  totalProducts: number;
   totalRevenue: number;
   revenueChange: number;
-  activeProducts: number;
-  newProducts: number;
-  lowStockAlerts: number;
-  salesTrend: SalesDataPoint[];
-  topProducts: ProductData[];
-  inventoryDistribution: InventoryData[];
-  stockLevels: StockLevel[];
-  predictions: {
-    sales: string;
-    inventory: string;
-    market: string;
-  };
+  totalExpenses: number;
+  lowStockProducts: number;
+  organicProducts: number;
 }
+
+interface AnalyticsTrends {
+  salesByCategory: Record<string, number>;
+  expensesByCategory: Record<string, number>;
+  stockLevels: StockLevel[];
+}
+
+interface AIAnalyticsResponse {
+  insights: string;
+  summary: AnalyticsSummary;
+  trends: AnalyticsTrends;
+  period: string;
+  metrics: string[];
+}
+
+const defaultAnalytics: AIAnalyticsResponse = {
+  insights: '',
+  summary: {
+    totalProducts: 0,
+    totalRevenue: 0,
+    revenueChange: 0,
+    totalExpenses: 0,
+    lowStockProducts: 0,
+    organicProducts: 0,
+  },
+  trends: {
+    salesByCategory: {},
+    expensesByCategory: {},
+    stockLevels: [],
+  },
+  period: 'weekly',
+  metrics: [],
+};
 
 const AIAnalytics = () => {
   const { toast } = useToast();
-  const [analytics, setAnalytics] = useState<AnalyticsData | null>(null);
+  const [searchParams] = useSearchParams();
+  const productId = searchParams.get('productId');
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [period, setPeriod] = useState<'daily' | 'weekly' | 'monthly' | 'yearly'>('monthly');
+  const [period, setPeriod] = useState<'daily' | 'weekly' | 'monthly' | 'yearly'>('weekly');
+  const [analytics, setAnalytics] = useState<AIAnalyticsResponse>(defaultAnalytics);
 
   const fetchAnalytics = async () => {
     try {
       setLoading(true);
-      setError(null);
-      const data = await farmer.getAIAnalytics({
+      const response = await farmer.getAIAnalytics({
         period,
         metrics: ['sales', 'inventory', 'predictions'],
-        filters: {
-          category: 'all',
+        filters: productId ? {
+          category: undefined,
           dateRange: {
             start: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(),
             end: new Date().toISOString()
           }
-        }
+        } : undefined,
       });
-      setAnalytics(data);
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to fetch analytics';
-      setError(errorMessage);
+      setAnalytics(response || defaultAnalytics);
+    } catch (error) {
+      console.error('Error fetching analytics:', error);
       toast({
         title: 'Error',
-        description: errorMessage,
+        description: 'Failed to fetch analytics data. Please try again later.',
         variant: 'destructive',
-        duration: 5000, // Show for 5 seconds
       });
-      
-      // If it's an AI service error, show a more detailed message
-      if (errorMessage.includes('AI service')) {
-        setAnalytics({
-          totalRevenue: 0,
-          revenueChange: 0,
-          activeProducts: 0,
-          newProducts: 0,
-          lowStockAlerts: 0,
-          salesTrend: [],
-          topProducts: [],
-          inventoryDistribution: [],
-          stockLevels: [],
-          predictions: {
-            sales: 'AI service is currently unavailable. Please try again later.',
-            inventory: 'AI service is currently unavailable. Please try again later.',
-            market: 'AI service is currently unavailable. Please try again later.'
-          }
-        });
-      }
+      setAnalytics(defaultAnalytics);
     } finally {
       setLoading(false);
     }
@@ -115,7 +112,7 @@ const AIAnalytics = () => {
 
   useEffect(() => {
     fetchAnalytics();
-  }, [period]);
+  }, [period, productId]);
 
   const handleGenerateReport = async () => {
     try {
@@ -156,189 +153,177 @@ const AIAnalytics = () => {
     );
   }
 
-  if (error && !analytics) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <h2 className="text-2xl font-bold text-red-600 mb-4">Error Loading Analytics</h2>
-          <p className="text-gray-600 mb-4">{error}</p>
-          <Button 
-            onClick={fetchAnalytics}
-            className="bg-organic-green hover:bg-organic-green-dark"
-          >
-            Retry
-          </Button>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="min-h-screen bg-gray-50">
       <Header />
       <div className="pt-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="flex justify-between items-center mb-8">
-            <h1 className="text-3xl font-bold text-gray-900">AI Analytics Dashboard</h1>
-            <div className="flex space-x-4">
-              <Select value={period} onValueChange={(value: 'daily' | 'weekly' | 'monthly' | 'yearly') => setPeriod(value)}>
-                <SelectTrigger className="w-[180px]">
-                  <SelectValue placeholder="Select period" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="daily">Daily</SelectItem>
-                  <SelectItem value="weekly">Weekly</SelectItem>
-                  <SelectItem value="monthly">Monthly</SelectItem>
-                  <SelectItem value="yearly">Yearly</SelectItem>
-                </SelectContent>
-              </Select>
-              <Button 
-                className="bg-organic-green hover:bg-organic-green-dark"
-                onClick={handleGenerateReport}
-              >
-                Generate Report
-              </Button>
+            <h1 className="text-3xl font-bold text-gray-900">AI Analytics</h1>
+            <Select value={period} onValueChange={(value: 'daily' | 'weekly' | 'monthly' | 'yearly') => setPeriod(value)}>
+              <SelectTrigger className="w-[180px]">
+                <SelectValue placeholder="Select period" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="daily">Daily</SelectItem>
+                <SelectItem value="weekly">Weekly</SelectItem>
+                <SelectItem value="monthly">Monthly</SelectItem>
+                <SelectItem value="yearly">Yearly</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          {loading ? (
+            <div className="flex justify-center py-8">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-organic-green"></div>
             </div>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Total Revenue</CardTitle>
-                <DollarSign className="h-4 w-4 text-organic-green" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">${analytics?.totalRevenue?.toFixed(2) ?? '0.00'}</div>
-                <p className={`text-xs ${(analytics?.revenueChange ?? 0) >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                  {(analytics?.revenueChange ?? 0) >= 0 ? '+' : ''}{analytics?.revenueChange ?? 0}% from last {period}
-                </p>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Active Products</CardTitle>
-                <Package className="h-4 w-4 text-organic-green" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{analytics?.activeProducts ?? 0}</div>
-                <p className="text-xs text-green-600">+{analytics?.newProducts ?? 0} new this {period}</p>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Low Stock Alerts</CardTitle>
-                <AlertTriangle className="h-4 w-4 text-red-500" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{analytics?.lowStockAlerts ?? 0}</div>
-                <p className="text-xs text-red-600">Products need attention</p>
-              </CardContent>
-            </Card>
-          </div>
-
-          <Tabs defaultValue="sales" className="space-y-4">
-            <TabsList>
-              <TabsTrigger value="sales">Sales Analytics</TabsTrigger>
-              <TabsTrigger value="inventory">Inventory Insights</TabsTrigger>
-              <TabsTrigger value="predictions">AI Predictions</TabsTrigger>
-            </TabsList>
-
-            <TabsContent value="sales" className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          ) : (
+            <div className="space-y-8">
+              {/* Summary Section */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <Card>
-                  <CardHeader>
-                    <CardTitle>Sales Trend</CardTitle>
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium">Total Revenue</CardTitle>
+                    <DollarSign className="h-4 w-4 text-organic-green" />
                   </CardHeader>
                   <CardContent>
-                    <div className="h-[300px] flex items-center justify-center bg-gray-50 rounded-lg">
-                      {loading ? (
-                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-organic-green"></div>
-                      ) : (
-                        <LineChart className="h-8 w-8 text-gray-400" />
-                      )}
-                    </div>
+                    <div className="text-2xl font-bold">${analytics.summary.totalRevenue.toFixed(2)}</div>
+                    <p className={`text-xs ${analytics.summary.revenueChange >= 0 ? 'text-green-500' : 'text-red-500'}`}>
+                      {analytics.summary.revenueChange >= 0 ? '+' : ''}{analytics.summary.revenueChange.toFixed(1)}% from last {period}
+                    </p>
                   </CardContent>
                 </Card>
                 <Card>
-                  <CardHeader>
-                    <CardTitle>Top Selling Products</CardTitle>
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium">Total Products</CardTitle>
+                    <Package className="h-4 w-4 text-organic-green" />
                   </CardHeader>
                   <CardContent>
-                    <div className="h-[300px] flex items-center justify-center bg-gray-50 rounded-lg">
-                      {loading ? (
-                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-organic-green"></div>
-                      ) : (
-                        <BarChart className="h-8 w-8 text-gray-400" />
-                      )}
-                    </div>
+                    <div className="text-2xl font-bold">{analytics.summary.totalProducts}</div>
+                    <p className="text-xs text-gray-500">{analytics.summary.organicProducts} organic products</p>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium">Low Stock Alert</CardTitle>
+                    <AlertTriangle className="h-4 w-4 text-red-500" />
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold">{analytics.summary.lowStockProducts}</div>
+                    <p className="text-xs text-red-500">Products need attention</p>
                   </CardContent>
                 </Card>
               </div>
-            </TabsContent>
 
-            <TabsContent value="inventory" className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Inventory Distribution</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="h-[300px] flex items-center justify-center bg-gray-50 rounded-lg">
-                      {loading ? (
-                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-organic-green"></div>
-                      ) : (
-                        <PieChart className="h-8 w-8 text-gray-400" />
-                      )}
-                    </div>
-                  </CardContent>
-                </Card>
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Stock Level Analysis</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="h-[300px] flex items-center justify-center bg-gray-50 rounded-lg">
-                      {loading ? (
-                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-organic-green"></div>
-                      ) : (
-                        <TrendingUp className="h-8 w-8 text-gray-400" />
-                      )}
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
-            </TabsContent>
-
-            <TabsContent value="predictions" className="space-y-4">
+              {/* AI Insights */}
               <Card>
                 <CardHeader>
-                  <CardTitle>AI-Generated Insights</CardTitle>
+                  <CardTitle>AI Insights</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  {loading ? (
-                    <div className="flex justify-center py-8">
-                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-organic-green"></div>
-                    </div>
-                  ) : (
-                    <div className="space-y-4">
-                      <div className="p-4 bg-green-50 rounded-lg">
-                        <h3 className="font-semibold text-green-800">Sales Prediction</h3>
-                        <p className="text-green-600">{analytics?.predictions?.sales ?? 'No sales prediction available'}</p>
-                      </div>
-                      <div className="p-4 bg-blue-50 rounded-lg">
-                        <h3 className="font-semibold text-blue-800">Inventory Recommendation</h3>
-                        <p className="text-blue-600">{analytics?.predictions?.inventory ?? 'No inventory recommendation available'}</p>
-                      </div>
-                      <div className="p-4 bg-purple-50 rounded-lg">
-                        <h3 className="font-semibold text-purple-800">Market Opportunity</h3>
-                        <p className="text-purple-600">{analytics?.predictions?.market ?? 'No market insights available'}</p>
-                      </div>
-                    </div>
-                  )}
+                  <div className="prose max-w-none">
+                    <p className="text-gray-700 whitespace-pre-line">{analytics.insights}</p>
+                  </div>
                 </CardContent>
               </Card>
-            </TabsContent>
-          </Tabs>
+
+              {/* Detailed Analytics */}
+              <Tabs defaultValue="sales" className="space-y-4">
+                <TabsList>
+                  <TabsTrigger value="sales">Sales Analytics</TabsTrigger>
+                  <TabsTrigger value="expenses">Expense Analytics</TabsTrigger>
+                  <TabsTrigger value="inventory">Inventory Management</TabsTrigger>
+                </TabsList>
+
+                <TabsContent value="sales" className="space-y-4">
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>Sales by Category</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-4">
+                        {Object.entries(analytics.trends.salesByCategory).map(([category, amount]) => (
+                          <div key={category} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                            <div>
+                              <h3 className="font-medium">{category}</h3>
+                            </div>
+                            <div className="text-right">
+                              <p className="font-medium text-organic-green">${amount.toFixed(2)}</p>
+                              <p className="text-sm text-gray-500">Revenue</p>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </CardContent>
+                  </Card>
+                </TabsContent>
+
+                <TabsContent value="expenses" className="space-y-4">
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>Expenses by Category</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-4">
+                        {Object.entries(analytics.trends.expensesByCategory).map(([category, amount]) => (
+                          <div key={category} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                            <div>
+                              <h3 className="font-medium">{category}</h3>
+                            </div>
+                            <div className="text-right">
+                              <p className="font-medium text-red-500">${amount.toFixed(2)}</p>
+                              <p className="text-sm text-gray-500">Expense</p>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </CardContent>
+                  </Card>
+                </TabsContent>
+
+                <TabsContent value="inventory" className="space-y-4">
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>Stock Levels</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-4">
+                        {analytics.trends.stockLevels.map((stock, index) => (
+                          <div key={index} className="p-4 bg-gray-50 rounded-lg">
+                            <div className="flex justify-between items-center mb-2">
+                              <div>
+                                <h3 className="font-medium">{stock.name}</h3>
+                                <p className="text-sm text-gray-500">{stock.category}</p>
+                              </div>
+                              <span className={`text-sm ${
+                                stock.stock < 10 ? 'text-red-500' :
+                                stock.stock < 20 ? 'text-yellow-500' :
+                                'text-green-500'
+                              }`}>
+                                {stock.stock} units
+                              </span>
+                            </div>
+                            <div className="w-full bg-gray-200 rounded-full h-2">
+                              <div
+                                className={`h-2 rounded-full ${
+                                  stock.stock < 10 ? 'bg-red-500' :
+                                  stock.stock < 20 ? 'bg-yellow-500' :
+                                  'bg-green-500'
+                                }`}
+                                style={{
+                                  width: `${Math.min((stock.stock / 50) * 100, 100)}%`
+                                }}
+                              />
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </CardContent>
+                  </Card>
+                </TabsContent>
+              </Tabs>
+            </div>
+          )}
         </div>
       </div>
       <Footer />

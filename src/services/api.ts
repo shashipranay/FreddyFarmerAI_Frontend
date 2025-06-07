@@ -95,14 +95,15 @@ api.interceptors.response.use(
   }
 );
 
-const handleApiError = (error: any) => {
-  if (error.response) {
-    throw new Error(error.response.data.message || 'An error occurred');
-  } else if (error.request) {
-    throw new Error('No response from server');
-  } else {
-    throw new Error('Error setting up request');
+const handleApiError = (error: unknown) => {
+  if (axios.isAxiosError(error)) {
+    if (error.response) {
+      throw new Error(error.response.data.message || 'An error occurred');
+    } else if (error.request) {
+      throw new Error('No response from server');
+    }
   }
+  throw new Error('Error setting up request');
 };
 
 export const auth = {
@@ -375,24 +376,49 @@ export const customer = {
     return response.data;
   },
 
-  addToCart: async (productId: string, quantity: number) => {
-    const response = await api.post('/customer/cart', { productId, quantity });
-    return response.data;
-  },
-
   getCart: async () => {
-    const response = await api.get('/customer/cart');
-    return response.data;
+    try {
+      const response = await api.get('/customer/cart');
+      return response.data;
+    } catch (error) {
+      handleApiError(error);
+    }
   },
 
-  updateCartItem: async (cartItemId: string, quantity: number) => {
-    const response = await api.put(`/customer/cart/${cartItemId}`, { quantity });
-    return response.data;
+  addToCart: async (productId: string, quantity: number = 1) => {
+    try {
+      const response = await api.post('/customer/cart/add', { productId, quantity });
+      return response.data;
+    } catch (error) {
+      handleApiError(error);
+    }
   },
 
-  removeFromCart: async (cartItemId: string) => {
-    const response = await api.delete(`/customer/cart/${cartItemId}`);
-    return response.data;
+  updateCartItem: async (productId: string, quantity: number) => {
+    try {
+      const response = await api.put('/customer/cart/update', { productId, quantity });
+      return response.data;
+    } catch (error) {
+      handleApiError(error);
+    }
+  },
+
+  removeFromCart: async (productId: string) => {
+    try {
+      const response = await api.delete(`/customer/cart/remove/${productId}`);
+      return response.data;
+    } catch (error) {
+      handleApiError(error);
+    }
+  },
+
+  clearCart: async () => {
+    try {
+      const response = await api.delete('/customer/cart/clear');
+      return response.data;
+    } catch (error) {
+      handleApiError(error);
+    }
   },
 
   placeOrder: async (orderData: {
@@ -408,7 +434,7 @@ export const customer = {
     try {
       const response = await api.get('/customer/orders');
       return response.data;
-    } catch (error) {
+    } catch (error: unknown) {
       handleApiError(error);
     }
   },
@@ -426,43 +452,7 @@ export const customer = {
     try {
       const response = await api.get('/customer/market-insights');
       return response.data;
-    } catch (error) {
-      handleApiError(error);
-    }
-  },
-
-  async addToCart(productId: string) {
-    try {
-      const response = await api.post('/customer/cart', { productId });
-      return response.data;
-    } catch (error) {
-      handleApiError(error);
-    }
-  },
-
-  async getCart() {
-    try {
-      const response = await api.get('/customer/cart');
-      return response.data;
-    } catch (error) {
-      handleApiError(error);
-    }
-  },
-
-  async updateCartItem(productId: string, quantity: number) {
-    try {
-      const response = await api.put('/customer/cart', { productId, quantity });
-      return response.data;
-    } catch (error) {
-      handleApiError(error);
-    }
-  },
-
-  async removeFromCart(productId: string) {
-    try {
-      const response = await api.delete(`/customer/cart/${productId}`);
-      return response.data;
-    } catch (error) {
+    } catch (error: unknown) {
       handleApiError(error);
     }
   },
@@ -480,7 +470,7 @@ export const customer = {
     try {
       const response = await api.post('/customer/chat', { message });
       return response.data;
-    } catch (error) {
+    } catch (error: unknown) {
       handleApiError(error);
     }
   }

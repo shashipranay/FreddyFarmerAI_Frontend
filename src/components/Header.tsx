@@ -1,17 +1,17 @@
 import { Button } from '@/components/ui/button';
 import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuLabel,
-    DropdownMenuSeparator,
-    DropdownMenuTrigger,
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { useToast } from '@/components/ui/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { auth } from '@/services/api';
-import { Globe, LogOut, Plus, User } from 'lucide-react';
+import { BarChart, Globe, LogOut, Plus, Store, User } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import CustomerNav from './CustomerNav';
 
@@ -94,29 +94,67 @@ const Header = () => {
                 </Button>
               </>
             ) : isFarmer ? (
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" className="relative h-8 w-8 rounded-full">
-                    <User className="h-5 w-5" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-56">
-                  <DropdownMenuLabel>My Account</DropdownMenuLabel>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={() => navigate('/farmer/dashboard')}>
-                    <User className="h-4 w-4 mr-2" />
-                    Dashboard
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => navigate('/farmer/add-product')}>
-                    <Plus className="h-4 w-4 mr-2" />
-                    Add Product
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={handleLogout}>
-                    <LogOut className="h-4 w-4 mr-2" />
-                    Sign Out
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
+              <>
+                <Button
+                  variant="ghost"
+                  onClick={() => navigate('/farmer/dashboard')}
+                  className="text-gray-700 hover:text-organic-green"
+                >
+                  <User className="h-5 w-5 mr-2" />
+                  Dashboard
+                </Button>
+                <Button
+                  variant="ghost"
+                  onClick={() => navigate('/farmer/add-product')}
+                  className="text-gray-700 hover:text-organic-green"
+                >
+                  <Plus className="h-5 w-5 mr-2" />
+                  Add Product
+                </Button>
+                <Button
+                  variant="ghost"
+                  onClick={() => navigate('/marketplace')}
+                  className="text-gray-700 hover:text-organic-green"
+                >
+                  <Store className="h-5 w-5 mr-2" />
+                  My Products
+                </Button>
+                <Button
+                  variant="ghost"
+                  onClick={() => navigate('/marketplace')}
+                  className="text-gray-700 hover:text-organic-green"
+                >
+                  <Store className="h-5 w-5 mr-2" />
+                  Marketplace
+                </Button>
+                <Button
+                  variant="ghost"
+                  onClick={() => navigate('/farmer/ai-analytics')}
+                  className="text-gray-700 hover:text-organic-green"
+                >
+                  <BarChart className="h-5 w-5 mr-2" />
+                  AI Analytics
+                </Button>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" className="relative h-8 w-8 rounded-full">
+                      <User className="h-5 w-5" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-56">
+                    <DropdownMenuLabel>My Account</DropdownMenuLabel>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={() => navigate('/farmer/expenses')}>
+                      <BarChart className="h-4 w-4 mr-2" />
+                      Expenses
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={handleLogout}>
+                      <LogOut className="h-4 w-4 mr-2" />
+                      Sign Out
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </>
             ) : (
               <CustomerNav />
             )}

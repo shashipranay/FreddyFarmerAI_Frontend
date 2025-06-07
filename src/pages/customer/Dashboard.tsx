@@ -3,8 +3,8 @@ import Header from '@/components/Header';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { useToast } from '@/components/ui/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
+import { useToast } from '@/hooks/use-toast';
 import { customer } from '@/services/api';
 import { BarChart, Package, ShoppingCart, TrendingUp } from 'lucide-react';
 import { useEffect, useState } from 'react';
@@ -33,9 +33,11 @@ interface Order {
   date: string;
 }
 
+// ...imports remain unchanged...
+
 const CustomerDashboard = () => {
   const navigate = useNavigate();
-  const { toast } = useToast();
+  const toast = useToast();
   const { user } = useAuth();
   const [loading, setLoading] = useState(true);
   const [recentOrders, setRecentOrders] = useState<Order[]>([]);
@@ -67,10 +69,11 @@ const CustomerDashboard = () => {
         recommendations: []
       });
     } catch (error) {
-      toast({
+      toast.toast({
         title: 'Error',
         description: 'Failed to load dashboard data',
         variant: 'destructive',
+        duration: 3000
       });
     } finally {
       setLoading(false);
@@ -80,15 +83,18 @@ const CustomerDashboard = () => {
   const handleAddToCart = async (productId: string) => {
     try {
       await customer.addToCart(productId);
-      toast({
+      toast.toast({
         title: 'Success',
-        description: 'Product added to cart',
+        description: 'Product added to cart successfully',
+        variant: 'default',
+        duration: 3000
       });
     } catch (error) {
-      toast({
+      toast.toast({
         title: 'Error',
         description: 'Failed to add product to cart',
         variant: 'destructive',
+        duration: 3000
       });
     }
   };
@@ -163,13 +169,13 @@ const CustomerDashboard = () => {
                       <h3 className="font-semibold">Order #{order.id}</h3>
                       <p className="text-sm text-gray-500">{order.date}</p>
                     </div>
-                    <Badge variant={order.status === 'completed' ? 'success' : 'warning'}>
+                    <Badge variant={order.status === 'completed' ? 'default' : 'secondary'}>
                       {order.status}
                     </Badge>
                   </div>
                   <div className="mt-2">
                     {order.products.map((product) => (
-                      <div key={product.id} className="flex justify-between text-sm">
+                      <div key={`${order.id}-${product.id}`} className="flex justify-between text-sm">
                         <span>{product.name} x {product.quantity}</span>
                         <span>${product.price}</span>
                       </div>
@@ -232,17 +238,15 @@ const CustomerDashboard = () => {
               </Button>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {marketInsights.trendingProducts.slice(0, 3).map((product: any, index) => (
-                <Card key={index}>
-                  <CardHeader>
-                    <CardTitle className="text-sm">{product.name}</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="flex items-center space-x-2">
-                      <BarChart className="h-4 w-4 text-organic-green" />
-                      <span className="text-sm text-gray-600">{product.trend}</span>
+              {marketInsights.trendingProducts.slice(0, 3).map((product: { name: string; trend: string }) => (
+                <Card key={`trending-${product.name}`} className="p-4">
+                  <div className="flex justify-between items-center">
+                    <div>
+                      <h3 className="font-semibold">{product.name}</h3>
+                      <p className="text-sm text-gray-500">{product.trend}</p>
                     </div>
-                  </CardContent>
+                    <BarChart className="h-4 w-4 text-organic-green" />
+                  </div>
                 </Card>
               ))}
             </div>
@@ -254,4 +258,4 @@ const CustomerDashboard = () => {
   );
 };
 
-export default CustomerDashboard; 
+export default CustomerDashboard;
