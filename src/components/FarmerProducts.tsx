@@ -18,34 +18,12 @@ import {
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/components/ui/use-toast';
 import { farmer } from '@/services/api';
+import { Product, ProductFormData } from "@/types/product";
 import { Edit, Package, Plus, Trash2, Upload } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-interface Product {
-  _id: string;
-  name: string;
-  description: string;
-  price: number;
-  stock: number;
-  category: string;
-  image: string;
-  location: string;
-  harvestDate: string;
-  organic: boolean;
-}
-
-interface ProductFormData {
-  name: string;
-  description: string;
-  price: string;
-  stock: string;
-  category: string;
-  image: string;
-  location: string;
-  harvestDate: string;
-  organic: boolean;
-}
+const DEFAULT_PLACEHOLDER_IMAGE = 'https://res.cloudinary.com/demo/image/upload/v1/samples/food/fish-vegetables';
 
 const FarmerProducts = () => {
   const { toast } = useToast();
@@ -61,10 +39,10 @@ const FarmerProducts = () => {
     price: '',
     stock: '',
     category: '',
-    image: '',
     location: '',
     harvestDate: '',
     organic: false,
+    image: ''
   });
 
   const categories = [
@@ -131,10 +109,10 @@ const FarmerProducts = () => {
         price: '',
         stock: '',
         category: '',
-        image: '',
         location: '',
         harvestDate: '',
         organic: false,
+        image: ''
       });
       fetchProducts();
     } catch (error) {
@@ -151,11 +129,49 @@ const FarmerProducts = () => {
     if (!selectedProduct) return;
 
     try {
-      await farmer.updateProduct(selectedProduct._id, {
-        ...formData,
+      const updateData = {
+        name: formData.name,
+        description: formData.description,
         price: parseFloat(formData.price),
         stock: parseInt(formData.stock),
-      });
+        category: formData.category,
+        location: formData.location,
+        harvestDate: formData.harvestDate,
+        organic: formData.organic,
+        image: selectedProduct.images[0]?.url || ''
+      };
+
+      // Only upload new image if it's different from the current one and not empty
+      if (formData.image && formData.image !== selectedProduct.images[0]?.url && formData.image !== '') {
+        try {
+          // Convert base64 to File object
+          const response = await fetch(formData.image);
+          const blob = await response.blob();
+          const imageFile = new File([blob], 'image.jpg', { type: 'image/jpeg' });
+          
+          console.log('Uploading image file:', imageFile);
+          const imageUrl = await farmer.uploadImage(imageFile);
+          console.log('Received image URL:', imageUrl);
+          
+          if (!imageUrl) {
+            throw new Error('No image URL received from server');
+          }
+          
+          updateData.image = imageUrl;
+        } catch (error) {
+          console.error('Image upload error:', error);
+          toast({
+            title: 'Error',
+            description: 'Failed to upload image. Please try again.',
+            variant: 'destructive',
+          });
+          return;
+        }
+      }
+
+      console.log('Sending update data:', updateData);
+      
+      await farmer.updateProduct(selectedProduct._id, updateData);
       toast({
         title: 'Success',
         description: 'Product updated successfully',
@@ -163,6 +179,7 @@ const FarmerProducts = () => {
       setIsEditDialogOpen(false);
       fetchProducts();
     } catch (error) {
+      console.error('Update error:', error);
       toast({
         title: 'Error',
         description: 'Failed to update product',
@@ -196,10 +213,10 @@ const FarmerProducts = () => {
       price: product.price.toString(),
       stock: product.stock.toString(),
       category: product.category,
-      image: product.image,
       location: product.location,
       harvestDate: product.harvestDate,
       organic: product.organic,
+      image: product.images?.[0]?.url || ''
     });
     setIsEditDialogOpen(true);
   };
@@ -365,9 +382,13 @@ const FarmerProducts = () => {
             >
               <div className="relative h-48">
                 <img
-                  src={product.image}
+                  src={product.images?.[0]?.url || DEFAULT_PLACEHOLDER_IMAGE}
                   alt={product.name}
                   className="w-full h-full object-cover"
+                  onError={(e) => {
+                    const target = e.target as HTMLImageElement;
+                    target.src = DEFAULT_PLACEHOLDER_IMAGE;
+                  }}
                 />
                 {product.organic && (
                   <span className="absolute top-2 right-2 bg-organic-green text-white px-2 py-1 rounded-full text-xs">

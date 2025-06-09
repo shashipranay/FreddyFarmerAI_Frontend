@@ -13,15 +13,20 @@ interface Product {
   price: number;
   stock: number;
   category: string;
-  image: string;
+  images: Array<{
+    url: string;
+    public_id: string;
+  }>;
   location: string;
   harvestDate: string;
   organic: boolean;
-  farmer: {
+  farmer?: {
     name: string;
     location: string;
   };
 }
+
+const DEFAULT_PLACEHOLDER_IMAGE = 'https://res.cloudinary.com/demo/image/upload/v1/samples/food/fish-vegetables';
 
 const MarketplacePreview = () => {
   const { t } = useLanguage();
@@ -94,9 +99,13 @@ const MarketplacePreview = () => {
                     <div className="bg-gradient-to-br from-organic-green-light to-organic-green p-6 text-center relative overflow-hidden">
                       <div className="aspect-square">
                         <img
-                          src={product.image}
+                          src={product.images?.[0]?.url || DEFAULT_PLACEHOLDER_IMAGE}
                           alt={product.name}
                           className="w-full h-full object-cover rounded-lg"
+                          onError={(e) => {
+                            const target = e.target as HTMLImageElement;
+                            target.src = DEFAULT_PLACEHOLDER_IMAGE;
+                          }}
                         />
                       </div>
                       {product.organic && (
@@ -107,7 +116,7 @@ const MarketplacePreview = () => {
                     </div>
                     <div className="p-6">
                       <h3 className="font-bold text-lg text-gray-900 mb-1">{product.name}</h3>
-                      <p className="text-gray-600 text-sm mb-2">{product.farmer.name}</p>
+                      <p className="text-gray-600 text-sm mb-2">{product.farmer?.name || 'Unknown Farmer'}</p>
                       <div className="flex justify-between items-center mb-3">
                         <span className="text-organic-green font-bold text-lg">
                           ${product.price.toFixed(2)}

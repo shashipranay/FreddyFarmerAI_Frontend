@@ -1,13 +1,3 @@
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from '@/components/ui/select';
 import {
     Table,
     TableBody,
@@ -17,19 +7,26 @@ import {
     TableRow,
 } from '@/components/ui/table';
 import { useToast } from '@/components/ui/use-toast';
-import { farmer } from '@/services/api';
-import React, { useEffect, useState } from 'react';
+import { customer } from '@/services/api';
+import { useEffect, useState } from 'react';
 
 interface Product {
   _id: string;
   name: string;
   price: number;
-  stock: number;
+  images?: Array<{ url: string; public_id: string }>;
+}
+
+interface Farmer {
+  _id: string;
+  name: string;
+  location?: string;
 }
 
 interface Trade {
   _id: string;
   product: Product;
+  farmer: Farmer;
   quantity: number;
   amount: number;
   status: string;
@@ -38,220 +35,110 @@ interface Trade {
 
 export function TradeManagement() {
   const { toast } = useToast();
-  const [products, setProducts] = useState<Product[]>([]);
   const [trades, setTrades] = useState<Trade[]>([]);
   const [loading, setLoading] = useState(false);
-  const [formData, setFormData] = useState({
-    product: '',
-    quantity: '',
-    amount: '',
-  });
-
-  useEffect(() => {
-    fetchProducts();
-    fetchTrades();
-  }, []);
-
-  const fetchProducts = async () => {
-    try {
-      const response = await farmer.getProducts();
-      setProducts(response.data);
-    } catch (error) {
-      toast({
-        title: 'Error',
-        description: 'Failed to fetch products',
-        variant: 'destructive',
-      });
-    }
-  };
 
   const fetchTrades = async () => {
+    setLoading(true);
     try {
-      const response = await farmer.getTrades();
-      setTrades(response.data);
+      const trades = await customer.getTrades();
+      console.log('Fetched trades:', trades); // Debug log
+      setTrades(trades);
     } catch (error) {
+      console.error('Error fetching trades:', error);
       toast({
         title: 'Error',
         description: 'Failed to fetch trades',
         variant: 'destructive',
       });
-    }
-  };
-
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
-  };
-
-  const handleProductChange = (value: string) => {
-    const product = products.find(p => p._id === value);
-    if (product) {
-      setFormData(prev => ({
-        ...prev,
-        product: value,
-        amount: (product.price * Number(prev.quantity || 1)).toString(),
-      }));
-    }
-  };
-
-  const handleQuantityChange = (value: string) => {
-    const product = products.find(p => p._id === formData.product);
-    if (product) {
-      setFormData(prev => ({
-        ...prev,
-        quantity: value,
-        amount: (product.price * Number(value)).toString(),
-      }));
-    }
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-
-    try {
-      await farmer.createTrade({
-        product: formData.product,
-        quantity: Number(formData.quantity),
-        amount: Number(formData.amount),
-      });
-
-      toast({
-        title: 'Success',
-        description: 'Trade created successfully',
-      });
-
-      setFormData({
-        product: '',
-        quantity: '',
-        amount: '',
-      });
-
-      fetchTrades();
-    } catch (error: any) {
-      toast({
-        title: 'Error',
-        description: error.response?.data?.error || 'Failed to create trade',
-        variant: 'destructive',
-      });
     } finally {
       setLoading(false);
     }
   };
 
-  const handleCreateTestTrades = async () => {
-    setLoading(true);
-    try {
-      await farmer.createTestTrades({ count: 5 });
-      toast({
-        title: 'Success',
-        description: 'Test trades created successfully',
-      });
-      fetchTrades();
-    } catch (error: any) {
-      toast({
-        title: 'Error',
-        description: error.response?.data?.error || 'Failed to create test trades',
-        variant: 'destructive',
-      });
-    } finally {
-      setLoading(false);
+  useEffect(() => {
+    fetchTrades();
+    // Set up polling to refresh trades every 30 seconds
+    const intervalId = setInterval(fetchTrades, 30000);
+    return () => clearInterval(intervalId);
+  }, []);
+
+  const getStatusColor = (status: string) => {
+    switch (status.toLowerCase()) {
+      case 'completed':
+        return 'text-green-600';
+      case 'cancelled':
+        return 'text-red-600';
+      default:
+        return 'text-yellow-600';
     }
   };
 
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold">Trade Management</h2>
-        <Button
-          onClick={handleCreateTestTrades}
-          disabled={loading || products.length === 0}
+        <h2 className="text-2xl font-bold">My Trades</h2>
+        <button
+          onClick={fetchTrades}
+          className="px-4 py-2 text-sm bg-organic-green text-white rounded hover:bg-organic-green-dark transition-colors"
         >
-          Create Test Trades
-        </Button>
+          Refresh
+        </button>
       </div>
-
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className="space-y-2">
-            <Label htmlFor="product">Product</Label>
-            <Select
-              value={formData.product}
-              onValueChange={handleProductChange}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Select a product" />
-              </SelectTrigger>
-              <SelectContent>
-                {products.map(product => (
-                  <SelectItem key={product._id} value={product._id}>
-                    {product.name} (Stock: {product.stock})
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="quantity">Quantity</Label>
-            <Input
-              id="quantity"
-              name="quantity"
-              type="number"
-              min="1"
-              value={formData.quantity}
-              onChange={e => handleQuantityChange(e.target.value)}
-              required
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="amount">Amount</Label>
-            <Input
-              id="amount"
-              name="amount"
-              type="number"
-              min="0"
-              step="0.01"
-              value={formData.amount}
-              onChange={handleInputChange}
-              required
-              readOnly
-            />
-          </div>
-        </div>
-
-        <Button type="submit" disabled={loading}>
-          Create Trade
-        </Button>
-      </form>
-
-      <div className="border rounded-lg">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Product</TableHead>
-              <TableHead>Quantity</TableHead>
-              <TableHead>Amount</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead>Date</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {trades.map(trade => (
-              <TableRow key={trade._id}>
-                <TableCell>{trade.product.name}</TableCell>
-                <TableCell>{trade.quantity}</TableCell>
-                <TableCell>${trade.amount.toFixed(2)}</TableCell>
-                <TableCell>{trade.status}</TableCell>
-                <TableCell>
-                  {new Date(trade.createdAt).toLocaleDateString()}
-                </TableCell>
+      {loading ? (
+        <div className="text-center">Loading trades...</div>
+      ) : trades.length === 0 ? (
+        <div className="text-center text-gray-500">No trades found</div>
+      ) : (
+        <div className="border rounded-lg">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Product</TableHead>
+                <TableHead>Farmer</TableHead>
+                <TableHead>Quantity</TableHead>
+                <TableHead>Amount</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead>Date</TableHead>
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </div>
+            </TableHeader>
+            <TableBody>
+              {trades.map(trade => (
+                <TableRow key={trade._id}>
+                  <TableCell>
+                    <div className="flex items-center space-x-3">
+                      {trade.product.images && trade.product.images[0] ? (
+                        <img 
+                          src={trade.product.images[0].url} 
+                          alt={trade.product.name} 
+                          className="w-10 h-10 object-cover rounded"
+                          onError={(e) => {
+                            e.currentTarget.src = 'https://via.placeholder.com/40';
+                          }}
+                        />
+                      ) : (
+                        <div className="w-10 h-10 bg-gray-200 rounded flex items-center justify-center">
+                          <span className="text-gray-400">No image</span>
+                        </div>
+                      )}
+                      <span>{trade.product.name}</span>
+                    </div>
+                  </TableCell>
+                  <TableCell>{trade.farmer?.name || 'Unknown'}</TableCell>
+                  <TableCell>{trade.quantity}</TableCell>
+                  <TableCell>${trade.amount.toFixed(2)}</TableCell>
+                  <TableCell>
+                    <span className={`font-medium ${getStatusColor(trade.status)}`}>
+                      {trade.status}
+                    </span>
+                  </TableCell>
+                  <TableCell>{new Date(trade.createdAt).toLocaleDateString()}</TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
+      )}
     </div>
   );
 } 

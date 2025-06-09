@@ -48,6 +48,9 @@ api.interceptors.request.use((config) => {
     config.headers.Authorization = `Bearer ${token}`;
   }
   return config;
+}, (error) => {
+  console.error('Request interceptor error:', error);
+  return Promise.reject(error);
 });
 
 // Add response interceptor for error handling
@@ -63,6 +66,7 @@ api.interceptors.response.use(
     } else if (error.response.status === 401) {
       // Handle unauthorized access
       localStorage.removeItem('token');
+      localStorage.removeItem('user');
       window.location.href = '/login';
       throw new Error('Session expired - please login again');
     } else if (error.response.status === 403) {
@@ -146,12 +150,11 @@ export const auth = {
         timeout: 30000, // 30 second timeout for uploads
       });
       
-      if (!response.data?.imageUrl) {
+      if (!response.data?.url) {
         throw new Error('No image URL received from server');
       }
       
-      // Return the full image URL
-      return response.data.imageUrl;
+      return response.data.url;
     } catch (error) {
       if (error instanceof Error) {
         console.error('Image upload error:', error.message);
@@ -294,12 +297,27 @@ export const farmer = {
     location: string;
     harvestDate: string;
     organic: boolean;
+    images?: Array<{
+      url: string;
+      public_id: string;
+    }>;
   }) => {
-    const response = await api.post('/products', productData);
+    // Format the image data to match backend expectations
+    const formattedData = {
+      ...productData,
+      images: [{
+        url: productData.image,
+        public_id: productData.image.split('/').pop()?.split('.')[0] || ''
+      }]
+    };
+    delete formattedData.image; // Remove the old image field
+    
+    console.log('Sending product data:', formattedData);
+    const response = await api.post('/products', formattedData);
     return response.data;
   },
 
-  updateProduct: async (productId: string, productData: {
+  updateProduct: async (id: string, productData: {
     name?: string;
     description?: string;
     price?: number;
@@ -309,9 +327,31 @@ export const farmer = {
     location?: string;
     harvestDate?: string;
     organic?: boolean;
+    images?: Array<{
+      url: string;
+      public_id: string;
+    }>;
   }) => {
-    const response = await api.put(`/products/${productId}`, productData);
-    return response.data;
+    try {
+      const formattedData = { ...productData };
+      
+      // Format image data if present
+      if (formattedData.image) {
+        formattedData.images = [{
+          url: formattedData.image,
+          public_id: formattedData.image.split('/').pop()?.split('.')[0] || ''
+        }];
+        delete formattedData.image;
+      }
+
+      console.log('Sending update data:', formattedData);
+      
+      const response = await api.put(`/products/${id}`, formattedData);
+      return response.data;
+    } catch (error) {
+      console.error('Update product error:', error);
+      throw error;
+    }
   },
 
   deleteProduct: async (productId: string) => {
@@ -341,11 +381,11 @@ export const farmer = {
         timeout: 30000, // 30 second timeout for uploads
       });
       
-      if (!response.data?.imageUrl) {
+      if (!response.data?.url) {
         throw new Error('No image URL received from server');
       }
       
-      return response.data.imageUrl;
+      return response.data.url;
     } catch (error) {
       if (error instanceof Error) {
         console.error('Image upload error:', error.message);
@@ -383,35 +423,55 @@ export const customer = {
   getCart: async () => {
     try {
       const response = await api.get('/customer/cart');
+      console.log('Cart response:', response.data); // Debug log
       return response.data;
     } catch (error) {
+      console.error('Get cart error:', error); // Debug log
       handleApiError(error);
     }
   },
 
   addToCart: async (productId: string, quantity: number = 1) => {
     try {
+      if (!productId) {
+        throw new Error('Product ID is required');
+      }
+      console.log('Adding to cart:', { productId, quantity }); // Debug log
       const response = await api.post('/customer/cart/add', { productId, quantity });
+      console.log('Add to cart response:', response.data); // Debug log
       return response.data;
     } catch (error) {
+      console.error('Add to cart error:', error); // Debug log
       handleApiError(error);
     }
   },
 
   updateCartItem: async (productId: string, quantity: number) => {
     try {
+      if (!productId) {
+        throw new Error('Product ID is required');
+      }
+      console.log('Updating cart item:', { productId, quantity }); // Debug log
       const response = await api.put(`/customer/cart/update/${productId}`, { quantity });
+      console.log('Update cart response:', response.data); // Debug log
       return response.data;
     } catch (error) {
+      console.error('Update cart error:', error); // Debug log
       handleApiError(error);
     }
   },
 
   removeFromCart: async (productId: string) => {
     try {
+      if (!productId) {
+        throw new Error('Product ID is required');
+      }
+      console.log('Removing from cart:', productId); // Debug log
       const response = await api.delete(`/customer/cart/remove/${productId}`);
+      console.log('Remove from cart response:', response.data); // Debug log
       return response.data;
     } catch (error) {
+      console.error('Remove from cart error:', error); // Debug log
       handleApiError(error);
     }
   },
@@ -468,7 +528,24 @@ export const customer = {
     } catch (error: unknown) {
       handleApiError(error);
     }
-  }
+  },
+
+  getTrades: async () => {
+    try {
+      const response = await api.get('/customer/trades');
+      console.log('Trades response:', response.data); // Debug log
+      if (!response.data?.trades) {
+        throw new Error('Invalid response format from server');
+      }
+      return response.data.trades;
+    } catch (error) {
+      console.error('Error fetching trades:', error);
+      if (error instanceof Error) {
+        throw new Error(`Failed to fetch trades: ${error.message}`);
+      }
+      throw new Error('Failed to fetch trades');
+    }
+  },
 };
 
 export default api; 
