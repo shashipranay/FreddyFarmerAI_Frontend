@@ -1,5 +1,5 @@
 
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+import React, { createContext, ReactNode, useContext, useState } from 'react';
 
 type Language = 'en' | 'te' | 'hi';
 
@@ -31,7 +31,7 @@ const translations = {
     freshnessScore: 'Freshness Score',
     
     // Features
-    whyChoose: 'Why Choose FarmConnect?',
+    whyChoose: 'Why Choose Freddy Farmer?',
     aiAnalytics: 'AI-Powered Analytics',
     aiAnalyticsDesc: 'Track expenses, monitor crop health, and predict optimal harvest times with advanced AI algorithms.',
     freshnessTracking: 'Freshness Tracking',
@@ -62,9 +62,9 @@ const translations = {
     // Navigation Pages
     welcomeToMarketplace: 'Welcome to Marketplace',
     welcomeToFarmers: 'Welcome to Farmers Portal',
-    welcomeToHowItWorks: 'How FarmConnect Works',
-    welcomeToAbout: 'About FarmConnect',
-    welcomeToLogin: 'Login to FarmConnect'
+    welcomeToHowItWorks: 'How Freddy Farmer Works',
+    welcomeToAbout: 'About Freddy Farmer',
+    welcomeToLogin: 'Login to Freddy Farmer'
   },
   te: {
     // Header
@@ -87,7 +87,7 @@ const translations = {
     freshnessScore: 'తాజాదనం స్కోర్',
     
     // Features
-    whyChoose: 'FarmConnect ఎందుకు ఎంచుకోవాలి?',
+    whyChoose: 'Freddy Farmer ఎందుకు ఎంచుకోవాలి?',
     aiAnalytics: 'AI-శక్తితో కూడిన విశ్లేషణలు',
     aiAnalyticsDesc: 'అధునాతన AI అల్గోరిథమ్‌లతో ఖర్చులను ట్రాక్ చేయండి, పంట ఆరోగ్యాన్ని పర్యవేక్షించండి మరియు సరైన కోత సమయాలను అంచనా వేయండి.',
     freshnessTracking: 'తాజాదనం ట్రాకింగ్',
@@ -118,9 +118,9 @@ const translations = {
     // Navigation Pages
     welcomeToMarketplace: 'మార్కెట్‌ప్లేస్‌కు స్వాగతం',
     welcomeToFarmers: 'రైతుల పోర్టల్‌కు స్వాగతం',
-    welcomeToHowItWorks: 'FarmConnect ఎలా పనిచేస్తుంది',
-    welcomeToAbout: 'FarmConnect గురించి',
-    welcomeToLogin: 'FarmConnect లాగిన్'
+    welcomeToHowItWorks: 'Freddy Farmer ఎలా పనిచేస్తుంది',
+    welcomeToAbout: 'Freddy Farmer గురించి',
+    welcomeToLogin: 'Freddy Farmer లాగిన్'
   },
   hi: {
     // Header
@@ -143,7 +143,7 @@ const translations = {
     freshnessScore: 'ताजगी स्कोर',
     
     // Features
-    whyChoose: 'FarmConnect क्यों चुनें?',
+    whyChoose: 'Freddy Farmer क्यों चुनें?',
     aiAnalytics: 'AI-संचालित विश्लेषण',
     aiAnalyticsDesc: 'उन्नत AI एल्गोरिदम के साथ खर्च को ट्रैक करें, फसल स्वास्थ्य की निगरानी करें और इष्टतम कटाई के समय की भविष्यवाणी करें।',
     freshnessTracking: 'ताजगी ट्रैकिंग',
@@ -174,9 +174,9 @@ const translations = {
     // Navigation Pages
     welcomeToMarketplace: 'बाज़ार में आपका स्वागत है',
     welcomeToFarmers: 'किसान पोर्टल में आपका स्वागत है',
-    welcomeToHowItWorks: 'FarmConnect कैसे काम करता है',
-    welcomeToAbout: 'FarmConnect के बारे में',
-    welcomeToLogin: 'FarmConnect लॉगिन'
+    welcomeToHowItWorks: 'Freddy Farmer कैसे काम करता है',
+    welcomeToAbout: 'Freddy Farmer के बारे में',
+    welcomeToLogin: 'Freddy Farmer लॉगिन'
   }
 };
 

@@ -197,7 +197,7 @@ const AddProduct = () => {
                   <p className="text-gray-600">{product.description || 'Product description'}</p>
                   <div className="flex justify-between items-center">
                     <span className="text-organic-green font-bold">
-                      ${product.price || '0.00'}
+                      ₹{product.price || '0.00'}
                     </span>
                     <span className="text-sm text-gray-500">
                       Stock: {product.stock || '0'}

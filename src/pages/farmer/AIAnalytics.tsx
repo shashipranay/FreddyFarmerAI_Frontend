@@ -187,7 +187,7 @@ const AIAnalytics = () => {
                     <DollarSign className="h-4 w-4 text-organic-green" />
                   </CardHeader>
                   <CardContent>
-                    <div className="text-2xl font-bold">${analytics.summary.totalRevenue.toFixed(2)}</div>
+                    <div className="text-2xl font-bold">₹{analytics.summary.totalRevenue.toFixed(2)}</div>
                     <p className={`text-xs ${analytics.summary.revenueChange >= 0 ? 'text-green-500' : 'text-red-500'}`}>
                       {analytics.summary.revenueChange >= 0 ? '+' : ''}{analytics.summary.revenueChange.toFixed(1)}% from last {period}
                     </p>
@@ -248,7 +248,7 @@ const AIAnalytics = () => {
                               <h3 className="font-medium">{category}</h3>
                             </div>
                             <div className="text-right">
-                              <p className="font-medium text-organic-green">${amount.toFixed(2)}</p>
+                              <p className="font-medium text-organic-green">₹{amount.toFixed(2)}</p>
                               <p className="text-sm text-gray-500">Revenue</p>
                             </div>
                           </div>
@@ -271,7 +271,7 @@ const AIAnalytics = () => {
                               <h3 className="font-medium">{category}</h3>
                             </div>
                             <div className="text-right">
-                              <p className="font-medium text-red-500">${amount.toFixed(2)}</p>
+                              <p className="font-medium text-red-500">₹{amount.toFixed(2)}</p>
                               <p className="text-sm text-gray-500">Expense</p>
                             </div>
                           </div>

@@ -126,7 +126,7 @@ export function TradeManagement() {
                   </TableCell>
                   <TableCell>{trade.farmer?.name || 'Unknown'}</TableCell>
                   <TableCell>{trade.quantity}</TableCell>
-                  <TableCell>${trade.amount.toFixed(2)}</TableCell>
+                  <TableCell>₹{trade.amount.toFixed(2)}</TableCell>
                   <TableCell>
                     <span className={`font-medium ${getStatusColor(trade.status)}`}>
                       {trade.status}

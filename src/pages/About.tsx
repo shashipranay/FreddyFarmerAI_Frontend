@@ -1,9 +1,8 @@
 
-import React from 'react';
-import Header from '@/components/Header';
 import Footer from '@/components/Footer';
-import { useLanguage } from '@/contexts/LanguageContext';
+import Header from '@/components/Header';
 import { Card, CardContent } from '@/components/ui/card';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 const About = () => {
   const { t } = useLanguage();
@@ -29,7 +28,7 @@ const About = () => {
               <div>
                 <h2 className="text-3xl font-bold text-gray-900 mb-6">Our Mission</h2>
                 <p className="text-lg text-gray-600 mb-6">
-                  FarmConnect bridges the gap between organic farmers and conscious consumers, 
+                  Freddy Farmer bridges the gap between organic farmers and conscious consumers, 
                   eliminating middlemen to ensure fair prices for farmers and fresh produce for customers.
                 </p>
                 <p className="text-lg text-gray-600">

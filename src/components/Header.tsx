@@ -75,6 +75,20 @@ const Header = () => {
               <>
                 <Button
                   variant="ghost"
+                  onClick={() => navigate('/how-it-works')}
+                  className="text-gray-700 hover:text-organic-green"
+                >
+                  How It Works
+                </Button>
+                <Button
+                  variant="ghost"
+                  onClick={() => navigate('/about')}
+                  className="text-gray-700 hover:text-organic-green"
+                >
+                  About Me
+                </Button>
+                <Button
+                  variant="ghost"
                   onClick={() => navigate('/login')}
                   className="text-gray-700 hover:text-organic-green"
                 >

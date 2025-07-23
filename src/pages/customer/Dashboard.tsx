@@ -207,13 +207,13 @@ const CustomerDashboard = () => {
                     {order.products.map((item) => (
                       <div key={`${order._id}-${item.product._id}`} className="flex justify-between text-sm">
                         <span>{item.product.name} x {item.quantity}</span>
-                        <span>${(item.product.price * item.quantity).toFixed(2)}</span>
+                        <span>₹{(item.product.price * item.quantity).toFixed(2)}</span>
                       </div>
                     ))}
                     <div className="mt-2 pt-2 border-t">
                       <div className="flex justify-between font-semibold">
                         <span>Total</span>
-                        <span>${order.total.toFixed(2)}</span>
+                        <span>₹{order.total.toFixed(2)}</span>
                       </div>
                     </div>
                   </div>
@@ -250,7 +250,7 @@ const CustomerDashboard = () => {
                     <h3 className="font-semibold mb-2">{product.name}</h3>
                     <p className="text-sm text-gray-500 mb-2">{product.description}</p>
                     <div className="flex justify-between items-center">
-                      <span className="font-semibold">${(product.price || 0).toFixed(2)}</span>
+                      <span className="font-semibold">₹{(product.price || 0).toFixed(2)}</span>
                       <Button
                         onClick={() => handleAddToCart(product._id)}
                         size="sm"

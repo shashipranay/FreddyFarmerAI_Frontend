@@ -5,11 +5,11 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
 } from "@/components/ui/select";
 import { useToast } from '@/components/ui/use-toast';
 import { farmer } from '@/services/api';
@@ -197,7 +197,7 @@ const Expenses = () => {
                 <DollarSign className="h-4 w-4 text-red-500" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">${analytics.totalExpenses.toFixed(2)}</div>
+                <div className="text-2xl font-bold">₹{analytics.totalExpenses.toFixed(2)}</div>
                 <p className={`text-xs ${analytics.expenseChange <= 0 ? 'text-green-600' : 'text-red-600'}`}>
                   {analytics.expenseChange >= 0 ? '+' : ''}{analytics.expenseChange}% vs last {period}
                 </p>
@@ -246,7 +246,7 @@ const Expenses = () => {
                           </div>
                           <div className="flex items-center space-x-4">
                             <div className="text-right">
-                              <p className="font-semibold">${expense.amount.toFixed(2)}</p>
+                              <p className="font-semibold">₹{expense.amount.toFixed(2)}</p>
                               <p className="text-sm text-gray-500">{expense.date}</p>
                             </div>
                             <Button

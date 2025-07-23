@@ -1,5 +1,4 @@
 
-import React from 'react';
 
 const Footer = () => {
   return (
@@ -11,7 +10,7 @@ const Footer = () => {
               <div className="w-10 h-10 bg-gradient-to-br from-organic-green to-organic-green-light rounded-lg flex items-center justify-center">
                 <span className="text-white font-bold text-lg">🌱</span>
               </div>
-              <span className="text-2xl font-bold">FarmConnect</span>
+              <span className="text-2xl font-bold">Freddy Farmer</span>
             </div>
             <p className="text-gray-400 leading-relaxed">
               Connecting organic farmers directly with customers through AI-powered technology 
@@ -51,7 +50,7 @@ const Footer = () => {
         </div>
         
         <div className="border-t border-gray-800 mt-12 pt-8 text-center text-gray-400">
-          <p>&copy; 2024 FarmConnect. All rights reserved. Built with 💚 for sustainable farming.</p>
+          <p>&copy; 2024 Freddy Farmer. All rights reserved. Built with 💚 for sustainable farming.</p>
         </div>
       </div>
     </footer>

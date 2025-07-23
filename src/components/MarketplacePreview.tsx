@@ -119,7 +119,7 @@ const MarketplacePreview = () => {
                       <p className="text-gray-600 text-sm mb-2">{product.farmer?.name || 'Unknown Farmer'}</p>
                       <div className="flex justify-between items-center mb-3">
                         <span className="text-organic-green font-bold text-lg">
-                          ${product.price.toFixed(2)}
+                          ₹{product.price.toFixed(2)}
                         </span>
                         <span className="text-gray-500 text-sm">
                           📍 {product.location}

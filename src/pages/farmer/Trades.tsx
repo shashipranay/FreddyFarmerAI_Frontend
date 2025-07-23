@@ -355,7 +355,7 @@ const Trades = () => {
                 <DollarSign className="h-4 w-4 text-organic-green" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">${analytics.totalRevenue.toFixed(2)}</div>
+                <div className="text-2xl font-bold">₹{analytics.totalRevenue.toFixed(2)}</div>
                 <p className={`text-xs ${analytics.revenueChange >= 0 ? 'text-green-600' : 'text-red-600'}`}>
                   {analytics.revenueChange >= 0 ? '+' : ''}{analytics.revenueChange}% from last month
                 </p>
@@ -439,7 +439,7 @@ const Trades = () => {
                         </TableCell>
                         <TableCell>{trade.buyer?.name || 'N/A'}</TableCell>
                         <TableCell>{trade.quantity}</TableCell>
-                        <TableCell>${trade.amount.toFixed(2)}</TableCell>
+                        <TableCell>₹{trade.amount.toFixed(2)}</TableCell>
                         <TableCell>{new Date(trade.createdAt).toLocaleDateString()}</TableCell>
                         <TableCell>
                           <Badge

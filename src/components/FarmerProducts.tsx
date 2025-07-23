@@ -401,7 +401,7 @@ const FarmerProducts = () => {
                 <p className="text-gray-600 text-sm mb-2">{product.description}</p>
                 <div className="flex justify-between items-center mb-2">
                   <span className="text-organic-green font-bold">
-                    ${product.price.toFixed(2)}
+                    ₹{product.price.toFixed(2)}
                   </span>
                   <span className="text-sm text-gray-500">
                     Stock: {product.stock}

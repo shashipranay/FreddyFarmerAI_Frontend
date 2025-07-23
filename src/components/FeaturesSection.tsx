@@ -1,7 +1,7 @@
 
-import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { useLanguage } from '@/contexts/LanguageContext';
+import React from 'react';
 
 const FeaturesSection = () => {
   const { t } = useLanguage();
@@ -44,11 +44,11 @@ const FeaturesSection = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-16">
           <h2 className="text-4xl font-bold text-gray-900 mb-4">
-            {t('whyChoose').split('FarmConnect').map((part, index) => (
-              <span key={index}>
+            {t('whyChoose').split('Freddy Farmer').map((part, index) => (
+              <React.Fragment key={index}>
                 {part}
-                {index === 0 && <span className="text-organic-green">FarmConnect</span>}
-              </span>
+                {index === 0 && <span className="text-organic-green">Freddy Farmer</span>}
+              </React.Fragment>
             ))}
           </h2>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto">

@@ -1,5 +1,4 @@
 
-import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useLanguage } from '@/contexts/LanguageContext';
 
@@ -27,20 +26,20 @@ const FarmerDashboard = () => {
               </CardTitle>
             </CardHeader>
             <CardContent className="p-6">
-              <div className="text-3xl font-bold text-organic-green mb-2">$2,450</div>
+              <div className="text-3xl font-bold text-organic-green mb-2">₹2,450</div>
               <div className="text-green-600 text-sm">+15% from last week</div>
               <div className="mt-4 space-y-2">
                 <div className="flex justify-between">
                   <span className="text-gray-600">Tomatoes</span>
-                  <span className="font-semibold">$890</span>
+                  <span className="font-semibold">₹890</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-600">Lettuce</span>
-                  <span className="font-semibold">$650</span>
+                  <span className="font-semibold">₹650</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-600">Carrots</span>
-                  <span className="font-semibold">$910</span>
+                  <span className="font-semibold">₹910</span>
                 </div>
               </div>
             </CardContent>
@@ -54,20 +53,20 @@ const FarmerDashboard = () => {
               </CardTitle>
             </CardHeader>
             <CardContent className="p-6">
-              <div className="text-3xl font-bold text-organic-earth mb-2">$890</div>
+              <div className="text-3xl font-bold text-organic-earth mb-2">₹890</div>
               <div className="text-red-600 text-sm">-5% from last month</div>
               <div className="mt-4 space-y-2">
                 <div className="flex justify-between">
                   <span className="text-gray-600">Seeds</span>
-                  <span className="font-semibold">$320</span>
+                  <span className="font-semibold">₹320</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-600">Fertilizer</span>
-                  <span className="font-semibold">$280</span>
+                  <span className="font-semibold">₹280</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-600">Equipment</span>
-                  <span className="font-semibold">$290</span>
+                  <span className="font-semibold">₹290</span>
                 </div>
               </div>
             </CardContent>

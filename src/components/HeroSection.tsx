@@ -72,10 +72,10 @@ const HeroSection = () => {
               <div className="bg-white rounded-2xl p-6 transform -rotate-3">
                 <div className="grid grid-cols-2 gap-4">
                   {[
-                    { emoji: '🥬', name: 'Fresh Lettuce', price: '$3.99/lb', freshness: '98%' },
-                    { emoji: '🍅', name: 'Organic Tomatoes', price: '$4.50/lb', freshness: '96%' },
-                    { emoji: '🥕', name: 'Baby Carrots', price: '$2.99/lb', freshness: '99%' },
-                    { emoji: '🌽', name: 'Sweet Corn', price: '$1.99/ear', freshness: '97%' }
+                    { emoji: '🥬', name: 'Fresh Lettuce', price: '₹3.99/lb', freshness: '98%' },
+                    { emoji: '🍅', name: 'Organic Tomatoes', price: '₹4.50/lb', freshness: '96%' },
+                    { emoji: '🥕', name: 'Baby Carrots', price: '₹2.99/lb', freshness: '99%' },
+                    { emoji: '🌽', name: 'Sweet Corn', price: '₹1.99/ear', freshness: '97%' }
                   ].map((item, index) => (
                     <div key={index} className="bg-gradient-to-br from-accent to-organic-cream rounded-xl p-4 text-center hover:shadow-lg transition-shadow duration-300">
                       <div className="text-4xl mb-2">{item.emoji}</div>
